@@ -1,0 +1,1 @@
+require("jck_nvim")
