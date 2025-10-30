@@ -1,0 +1,40 @@
+# Use a suitable base image (e.g., Ubuntu, Alpine)
+FROM ubuntu:latest
+
+# Install Neovim and any dependencies
+WORKDIR /home
+RUN apt-get update 
+#RUN apt-get install software-properties-common
+#RUN add-apt-repository ppa:neovim-ppa/stable
+RUN apt-get install -y \
+    locales \
+    #neovim \
+    git \
+    curl \
+    nodejs \
+    npm
+
+# It is not recommended to do this... but if docker gives you ssl errors you can bypass them when using git and curl
+RUN touch ~/.curlrc
+RUN echo insecure >> ~/.curlrc
+RUN git config --global http.sslVerify false
+
+RUN curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-arm64.tar.gz
+RUN rm -rf /opt/nvim-linux-arm64
+RUN tar -C /opt -xzf nvim-linux-arm64.tar.gz
+
+ENV PATH="$PATH:/opt/nvim-linux-arm64/bin"
+
+COPY nvim /home/.config/nvim
+
+# This is the env nvim uses for finding the config
+ENV XDG_CONFIG_HOME="/home/.config"
+
+# Set Locale
+ENV LANG="en_US.UTF-8"
+ENV LANGUAGE="en_US:en"
+ENV LC_ALL="en_US.UTF-8"
+
+# Set the default command to run Neovim
+CMD ["nvim"]
+
